@@ -27,6 +27,7 @@ function register_omise_konbini() {
 			$this->restricted_countries = array( 'JP' );
 
 			add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
+			add_action( 'woocommerce_thankyou_' . $this->id, array( $this, 'display_link' ) );
 		}
 
 		/**
@@ -104,6 +105,67 @@ function register_omise_konbini() {
 					$order_id
 				)
 			);
+		}
+
+		/**
+		 * @param int|WC_Order $order
+		 * @param string       $context  pass 'email' value through this argument only for 'sending out an email' case.
+		 */
+		public function display_link( $order, $context = 'view' ) {
+			if ( ! $this->load_order( $order ) ) {
+				return;
+			}
+
+			$charge_id          = $this->get_charge_id_from_order();
+			$charge             = OmiseCharge::retrieve( $charge_id );
+			$payment_link       = $charge['authorize_uri'];
+			$expires_datetime   = new WC_DateTime( $charge['source']['references']['expires_at'], new DateTimeZone( 'UTC' ) );
+			$expires_datetime->set_utc_offset( wc_timezone_offset() );
+			?>
+
+			<div class="omise omise-konbini-details" <?php echo 'email' === $context ? 'style="margin-bottom: 4em; text-align:center;"' : ''; ?>>
+				<p>
+					<?php echo __( 'Your payment code has been sent to your email ', 'omise' ); ?>
+					<br/>
+					<?php
+					echo sprintf(
+						wp_kses(
+							__( 'Please find the payment instruction there or click on the link below and complete the payment by:<br/><strong>%1$s %2$s</strong>.', 'omise' ),
+							array( 'br' => array(), 'strong' => array() )
+						),
+						wc_format_datetime( $expires_datetime, wc_date_format() ),
+						wc_format_datetime( $expires_datetime, wc_time_format() )
+					);
+					?>
+					<br/>
+					<?php
+					echo sprintf(
+						wp_kses(
+							__( '<a href="%s">Payment Link</a>', 'omise' ),
+							array( 'a' => array() )
+						),
+						$payment_link
+					);
+					?>
+				</p>
+
+				<div class="omise-konbini-footnote" <?php echo 'email' === $context ? 'style="margin-top: 4em; padding: 1em; font-size: 85%; text-align: right; background-color: #f8f8f8;"' : ''; ?>>
+					<p <?php echo 'email' === $context ? 'style="margin: 0; padding: 0;"' : ''; ?>>
+						<?php
+						echo wp_kses(
+							__(
+								'
+								There may be a small fee for the transaction depending on the payment channel you choose.<br/>
+								If you fail to make payment by the stated time, your order will be automatically canceled.
+								', 'omise'
+							),
+							array( 'br' => array() )
+						);
+						?>
+					</p>
+				</div>
+			</div>
+			<?php
 		}
 	}
 
