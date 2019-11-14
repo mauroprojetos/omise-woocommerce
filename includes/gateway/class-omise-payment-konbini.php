@@ -60,12 +60,51 @@ function register_omise_konbini() {
 		/**
  		 * @inheritdoc
  		 */
-		public function charge( $order_id, $order ) { }
+		public function charge( $order_id, $order ) {
+			$total      = $order->get_total();
+			$currency   = $order->get_order_currency();
+			$return_uri = add_query_arg(
+				array( 'wc-api' => 'omise_konbini_callback', 'order_id' => $order_id ), home_url()
+			);
+			$metadata   = array_merge(
+				apply_filters( 'omise_charge_params_metadata', array(), $order ),
+				array( 'order_id' => $order_id ) // override order_id as a reference for webhook handlers.
+			);
+
+			return OmiseCharge::create( array(
+				'amount'      => Omise_Money::to_subunit( $total, $currency ),
+				'currency'    => $currency,
+				'description' => apply_filters( 'omise_charge_params_description', 'WooCommerce Order id ' . $order_id, $order ),
+				'source'      => array( 'type' => 'econtext', 'name' => 'ヤマダタロウ', 'email' => 'user@omise.co', 'phone_number' => '01234567891', ),
+				'return_uri'  => $return_uri,
+				'metadata'    => $metadata
+			) );
+		}
 
 		/**
 		 * @inheritdoc
 		 */
-		public function result( $order_id, $order, $charge ) { }
+		public function result( $order_id, $order, $charge ) {
+			if ( self::STATUS_FAILED === $charge['status'] ) {
+				return $this->payment_failed( $charge['failure_message'] . ' (code: ' . $charge['failure_code'] . ')' );
+			}
+
+			if ( self::STATUS_PENDING === $charge['status'] ) {
+				$order->update_status( 'on-hold', __( 'Omise: Awaiting Konbini Payment to be paid.', 'omise' ) );
+
+				return array(
+					'result'   => 'success',
+					'redirect' => $this->get_return_url( $order )
+				);
+			}
+
+			return $this->payment_failed(
+				sprintf(
+					__( 'Please feel free to try submitting your order again, or contact our support team if you have any questions (Your temporary order id is \'%s\')', 'omise' ),
+					$order_id
+				)
+			);
+		}
 	}
 
 	if ( ! function_exists( 'add_omise_konbini' ) ) {
