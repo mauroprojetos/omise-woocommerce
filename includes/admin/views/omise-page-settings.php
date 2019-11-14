@@ -139,6 +139,7 @@
 										new Omise_Payment_Creditcard,
 										new Omise_Payment_Installment,
 										new Omise_Payment_Internetbanking,
+										new Omise_Payment_Konbini,
 										new Omise_Payment_Truemoney
 									);
 									foreach ( $available_gateways as $gateway ) :
