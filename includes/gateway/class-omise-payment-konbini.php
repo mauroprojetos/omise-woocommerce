@@ -12,7 +12,7 @@ function register_omise_konbini() {
 			parent::__construct();
 
 			$this->id                 = 'omise_konbini';
-			$this->has_fields         = false;
+			$this->has_fields         = true;
 			$this->method_title       = __( 'Convenience Store / Pay-easy / Online Banking', 'omise' );
 			$this->method_description = wp_kses(
 				__( 'Accept payments through <strong>Convenience Store</strong> / <strong>Pay-easy</strong> / <strong>Online Banking</strong> via Omise payment gateway.', 'omise' ),
@@ -59,15 +59,25 @@ function register_omise_konbini() {
 		}
 
 		/**
+		 * @inheritdoc
+		 */
+		public function payment_fields() {
+			Omise_Util::render_view( 'templates/payment/form-konbini.php', array() );
+		}
+
+		/**
  		 * @inheritdoc
  		 */
 		public function charge( $order_id, $order ) {
-			$total      = $order->get_total();
-			$currency   = $order->get_order_currency();
-			$return_uri = add_query_arg(
+			$konbini_name  = isset( $_POST['omise_konbini_name'] ) ? sanitize_text_field( $_POST['omise_konbini_name'] ) : '';
+			$konbini_email = isset( $_POST['omise_konbini_email'] ) ? sanitize_text_field( $_POST['omise_konbini_email'] ) : '';
+			$konbini_phone = isset( $_POST['omise_konbini_phone'] ) ? sanitize_text_field( $_POST['omise_konbini_phone'] ) : '';
+			$total         = $order->get_total();
+			$currency      = $order->get_order_currency();
+			$return_uri    = add_query_arg(
 				array( 'wc-api' => 'omise_konbini_callback', 'order_id' => $order_id ), home_url()
 			);
-			$metadata   = array_merge(
+			$metadata      = array_merge(
 				apply_filters( 'omise_charge_params_metadata', array(), $order ),
 				array( 'order_id' => $order_id ) // override order_id as a reference for webhook handlers.
 			);
@@ -76,7 +86,7 @@ function register_omise_konbini() {
 				'amount'      => Omise_Money::to_subunit( $total, $currency ),
 				'currency'    => $currency,
 				'description' => apply_filters( 'omise_charge_params_description', 'WooCommerce Order id ' . $order_id, $order ),
-				'source'      => array( 'type' => 'econtext', 'name' => 'ヤマダタロウ', 'email' => 'user@omise.co', 'phone_number' => '01234567891', ),
+				'source'      => array( 'type' => 'econtext', 'name' => $konbini_name, 'email' => $konbini_email, 'phone_number' => $konbini_phone ),
 				'return_uri'  => $return_uri,
 				'metadata'    => $metadata
 			) );
