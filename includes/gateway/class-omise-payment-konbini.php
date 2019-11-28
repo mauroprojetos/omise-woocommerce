@@ -152,28 +152,12 @@ function register_omise_konbini() {
 					echo sprintf(
 						wp_kses(
 							__( '<a href="%s">Payment Link</a>', 'omise' ),
-							array( 'a' => array() )
+							array( 'a' => array( 'href' => array() ) )
 						),
 						$payment_link
 					);
 					?>
 				</p>
-
-				<div class="omise-konbini-footnote" <?php echo 'email' === $context ? 'style="margin-top: 4em; padding: 1em; font-size: 85%; text-align: right; background-color: #f8f8f8;"' : ''; ?>>
-					<p <?php echo 'email' === $context ? 'style="margin: 0; padding: 0;"' : ''; ?>>
-						<?php
-						echo wp_kses(
-							__(
-								'
-								There may be a small fee for the transaction depending on the payment channel you choose.<br/>
-								If you fail to make payment by the stated time, your order will be automatically canceled.
-								', 'omise'
-							),
-							array( 'br' => array() )
-						);
-						?>
-					</p>
-				</div>
 			</div>
 			<?php
 		}
