@@ -28,6 +28,7 @@ function register_omise_konbini() {
 
 			add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 			add_action( 'woocommerce_thankyou_' . $this->id, array( $this, 'display_link' ) );
+			add_action( 'woocommerce_email_after_order_table', array( $this, 'email_link' ) );
 		}
 
 		/**
@@ -160,6 +161,18 @@ function register_omise_konbini() {
 				</p>
 			</div>
 			<?php
+		}
+
+		/**
+		 * @param WC_Order $order
+		 *
+		 * @see   woocommerce/templates/emails/email-order-details.php
+		 * @see   woocommerce/templates/emails/plain/email-order-details.php
+		 */
+		public function email_link( $order ) {
+			if ( $this->id == $order->get_payment_method() ) {
+				$this->display_link( $order, 'email' );
+			}
 		}
 	}
 
