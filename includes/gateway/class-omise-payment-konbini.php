@@ -152,8 +152,8 @@ function register_omise_konbini() {
 					<?php
 					echo sprintf(
 						wp_kses(
-							__( '<a href="%s">Payment Link</a>', 'omise' ),
-							array( 'a' => array( 'href' => array() ) )
+							__( '<a href="%s" target="_blank">Payment Link</a>', 'omise' ),
+							array( 'a' => array( 'href' => array(), 'target' => array() ) )
 						),
 						$payment_link
 					);
