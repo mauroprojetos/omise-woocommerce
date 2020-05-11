@@ -362,7 +362,7 @@ defined( 'ABSPATH' ) or die( 'No direct script access allowed.' );
 				$charge->capture();
 
 				if ( ! OmisePluginHelperCharge::isPaid( $charge ) ) {
-					throw new Exception( $charge['failure_message'] );
+					throw new Exception( Omise()->translate( $charge['failure_message'] ) );
 				}
 
 				$this->order()->add_order_note(

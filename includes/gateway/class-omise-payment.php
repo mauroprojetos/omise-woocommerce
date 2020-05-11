@@ -315,7 +315,7 @@ abstract class Omise_Payment extends WC_Payment_Gateway {
 							__( 'Omise: Payment failed.<br/>%s (code: %s) (manual sync).', 'omise' ),
 							array( 'br' => array() )
 						),
-						$charge['failure_message'],
+						Omise()->translate( $charge['failure_message'] ),
 						$charge['failure_code']
 					)
 				);

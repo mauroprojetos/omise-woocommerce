@@ -140,7 +140,7 @@ class Omise_Callback {
 	 */
 	protected function payment_failed( $order, $charge ) {
 		$message         = __( 'It seems we\'ve been unable to process your payment properly:<br/>%s', 'omise' );
-		$failure_message = $charge['failure_message'] . ' (code: ' . $charge['failure_code'] . ')';
+		$failure_message = Omise()->translate( $charge['failure_message'] ) . ' (code: ' . $charge['failure_code'] . ')';
 
 		$order->add_order_note(
 			sprintf( wp_kses( __( 'OMISE: Payment failed.<br/>%s', 'omise' ), array( 'br' => array() ) ), $failure_message )
