@@ -98,6 +98,24 @@ fieldset.card-exists {
 }
 
 /**
+ * Omise PromptPay
+ */
+.omise-promptpay-details {
+	margin-bottom: 4em;
+	text-align: center;
+}
+.omise-promptpay-details img {
+	margin: auto;
+}
+.omise-promptpay-logo {
+	background: url('../images/promptpay.svg');
+	background-size: cover;
+	width: 200px;
+	height: 51px;
+	margin: auto;
+}
+
+/**
  * 2). Components
  * (stylesheets that are designed generally and may be commonly used as a component).
  */
